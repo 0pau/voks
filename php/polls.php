@@ -3,14 +3,24 @@
     require_once "db.php";
     require_once "util.php";
 
-    function getPolls()
+    function getPolls($statusFilter = "actual")
     {
         global $db;
-        $r = mysqli_query($db, "SELECT id FROM poll");
+        $query = "SELECT id, kezdet, veg FROM szavazasok";
+        if ($statusFilter == "actual") {
+            $query = $query . " WHERE NOW() BETWEEN kezdet AND veg";
+        }
+        if ($statusFilter == "upcoming") {
+            $query = $query . " WHERE kezdet > NOW()";
+        }
+        if ($statusFilter == "closed") {
+            $query = $query . " WHERE veg < NOW()";
+        }
         $list = [];
+        $r = $db->query($query);
 
-        while ($row = mysqli_fetch_object($r)) {
-            $row = getPollInfo($row->id);
+        while ($row = $r->fetch_object()) {
+            $row = getPollInfo($row->id, $statusFilter);
             $list[] = $row;
         }
 
@@ -25,16 +35,23 @@
             throw new Exception("Hibás azonosító");
         }
 
-        $r = mysqli_query($db, "SELECT *, user.name AS userFullName FROM poll INNER JOIN user ON poll.username = user.username WHERE id = $id");
+        $query = "SELECT *, users.nev AS teljesNev FROM szavazasok INNER JOIN users ON szavazasok.username = users.username WHERE id = ?";
 
-        if (mysqli_num_rows($r) != 1) {
+        $stmt = $db->prepare($query);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $r = $stmt->get_result();
+
+        if ($r->num_rows != 1) {
             throw new Exception("A kért szavazás nem található.");
         }
 
-        $obj = mysqli_fetch_object($r);
+        $obj = $r->fetch_object();
 
-        $start = strtotime($obj->startDate);
-        $end = strtotime($obj->endDate);
+        $r->close();
+
+        $start = strtotime($obj->kezdet);
+        $end = strtotime($obj->veg);
         $obj->status = 1;
         if (time() > $end) {
             $obj->status = 2;
@@ -42,10 +59,19 @@
             $obj->status = 0;
         }
 
-        $obj->startDate = formatDate($obj->startDate, true);
-        $obj->endDate = formatDate($obj->endDate, true);
+        $obj->kezdet = formatDate($obj->kezdet, true);
+        $obj->veg = formatDate($obj->veg, true);
 
         return $obj;
 
     }
+
+    function userHasVoted($pollId) {
+        if (!isLoggedIn()) {
+            return "false";
+        }
+        return "true";
+    }
+
+
 

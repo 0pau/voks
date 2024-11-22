@@ -1,12 +1,14 @@
 <?php
     require_once "php/polls.php";
+    require_once "php/user_service.php";
+
     $error = "";
     $pollInfo = "";
     if (!isset($_GET["id"])) {
         $error = "Hibás kérés";
     } else {
         try {
-            $pollInfo = getPollInfo($_GET["id"]);
+            $pollInfo = getPollInfo(intval($_GET["id"]));
         } catch (Exception $e) {
             $error = $e->getMessage();
         }
@@ -28,10 +30,13 @@
         </div>
         <button>Bejelentkezés</button>
     </nav>
+    <?php
+    echo userHasVoted($pollInfo->id);
+    ?>
     <section>
         <?php if ($error == "") { ?>
         <div class="poll-head">
-            <h1><?php echo $pollInfo->title ?></h1>
+            <h1><?php echo $pollInfo->cim ?></h1>
             <?php if ($pollInfo->status == 1) { ?>
             <p class="accentText">Aktuális szavazás</p>
             <?php } else if ($pollInfo->status == 0) { ?>
@@ -41,20 +46,20 @@
             <?php } ?>
         </div>
         <p class="poll-info-head">A szavazásról</p>
-        <p><?php echo $pollInfo->description ?></p>
+        <p><?php echo $pollInfo->leiras ?></p>
         <p class="poll-info-head">Fontosabb információk a szavazásról</p>
         <div class="gr c3 poll-info-cards">
             <div class="card">
                 <p>A szavazás kiírója</p>
-                <p><?php echo $pollInfo->userFullName ?></p>
+                <p><?php echo $pollInfo->teljesNev ?></p>
             </div>
             <div class="card">
                 <p>Szavazás kezdete</p>
-                <p><?php echo $pollInfo->startDate ?></p>
+                <p><?php echo $pollInfo->kezdet ?></p>
             </div>
             <div class="card">
                 <p>Szavazás vége</p>
-                <p><?php echo $pollInfo->endDate ?></p>
+                <p><?php echo $pollInfo->veg ?></p>
             </div>
         </div>
         <?php if ($pollInfo->status == 1) { ?>

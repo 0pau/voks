@@ -21,6 +21,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>VOKS</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
 <body>
     <nav>
@@ -28,23 +29,43 @@
             <img src="img/logo.png" id="logo">
             <span>VOKS</span>
         </div>
-        <button>Bejelentkezés</button>
+        <?php if (!isLoggedIn()) { ?>
+            <a href="login.php"><button>Bejelentkezés</button></a>
+        <?php } else { ?>
+            <div class="user-menu">
+                <span class="material-symbols-rounded">person</span>
+                <span class="user-name"><?php echo getUserInfo()->nev ?></span>
+                <div class="submenu">
+                    <a href="profile.php">Adataim</a>
+                    <?php if (getUserInfo()->admin_e == 1) { ?>
+                        <a href="admin.php">Adminisztráció</a>
+                    <?php } ?>
+                    <a href="logout.php">Kijelentkezés</a>
+                </div>
+            </div>
+        <?php } ?>
     </nav>
-    <?php
-    echo userHasVoted($pollInfo->id);
-    ?>
     <section>
         <?php if ($error == "") { ?>
-        <div class="poll-head">
-            <h1><?php echo $pollInfo->cim ?></h1>
-            <?php if ($pollInfo->status == 1) { ?>
-            <p class="accentText">Aktuális szavazás</p>
-            <?php } else if ($pollInfo->status == 0) { ?>
-            <p class="accentText">Közelgő szavazás</p>
-            <?php } else { ?>
-            <p class="accentText error">Lejárt szavazás</p>
+        <div class="section-head">
+            <div class="poll-head">
+                <h1><?php echo $pollInfo->cim ?></h1>
+                <?php if ($pollInfo->status == 1) { ?>
+                    <p class="accentText">Aktuális szavazás</p>
+                <?php } else if ($pollInfo->status == 0) { ?>
+                    <p class="accentText">Közelgő szavazás</p>
+                <?php } else { ?>
+                    <p class="accentText error">Lejárt szavazás</p>
+                <?php } ?>
+            </div>
+            <?php if (isLoggedIn() && userHasVoted($pollInfo->id)) { ?>
+                <div class="i-voted-badge">
+                    <span class="material-symbols-rounded">editor_choice</span>
+                    <span>Szavaztam</span>
+                </div>
             <?php } ?>
         </div>
+
         <p class="poll-info-head">A szavazásról</p>
         <p><?php echo $pollInfo->leiras ?></p>
         <p class="poll-info-head">Fontosabb információk a szavazásról</p>
@@ -63,35 +84,75 @@
             </div>
         </div>
         <?php if ($pollInfo->status == 1) { ?>
-        <div class="action-box">
-            <p>Ön még nem adta le szavazatát. Éljen a lehetőséggel!</p>
-            <button>Szavazás megkezdése</button>
-        </div>
+            <?php if (!isLoggedIn()) { ?>
+                <div class="action-box">
+                    <p>A szavazáshoz jelentkezzen be VOKS-fiókjával!</p>
+                    <a href='login.php'><button>Bejelentkezés</button></a>
+                </div>
+            <?php } else { ?>
+            <?php if (!userHasVoted($pollInfo->id)) { ?>
+                <div class="action-box">
+                    <p>Ön még nem adta le szavazatát. Éljen a lehetőséggel!</p>
+                    <a href='vote.php?id=<?php echo $pollInfo->id ?>'><button>Szavazás megkezdése</button></a>
+                </div>
+                <?php } ?>
+            <?php } ?>
         <?php } ?>
         <hr class="o25">
-        <?php if ($pollInfo->status == 2) { ?>
+        <?php if ($pollInfo->status == 2 || $pollInfo->elo_e == 1) { ?>
             <p class="poll-info-head">Eredmények</p>
-            <span>Jelenleg nincsenek eredmények</span>
-        <?php } else { ?>
+            <?php $results = getPollResults($pollInfo->id); ?>
+                <?php if (sizeof($results) != 0) { ?>
+                <div class="poll-results">
+                    <div class="candidates">
+                        <?php
+                            $pieChartBg = "";
+                            $p = 0;
+                            foreach ($results as $candidate) {
+                                $pieChartBg = $pieChartBg.$candidate->szin." ".$p."%,";
+                                $pieChartBg = $pieChartBg.$candidate->szin." ".$candidate->szazalek+$p."%,";
+                                $p = $candidate->szazalek;
+                                printf('
+                                <div class="candidate-result">
+                                    <div>
+                                        <span>%s</span>
+                                        <span>%d szavazat / %d%%</span>
+                                    </div>
+                                    <div class="pb"><div style="width: %d%%; background-color: %s"></div></div>
+                                </div>
+                                ', $candidate->nev, $candidate->szavazatok, $candidate->szazalek, $candidate->szazalek, $candidate->szin);
+                            }
+                            $pieChartBg = substr($pieChartBg, 0, -1);
+                        ?>
+                    </div>
+                    <div class="pie-chart-container">
+                        <div class="pie-chart" style="background-image: conic-gradient(<?php echo $pieChartBg ?>)"></div>
+                    </div>
+                </div>
+                <?php } else { ?>
+                    <span>Még senki sem adott le szavazatot.</span>
+                <?php } ?>
+        <?php } ?>
         <p class="poll-info-head">Jelöltek</p>
         <div class="gr c2">
-            <div class="card candidate">
-                <p>Jelölt neve</p>
-                <p>Foglalkozás, kor</p>
-                <p>Program</p>
-            </div>
-            <div class="card candidate">
-                <p>Jelölt neve</p>
-                <p>Foglalkozás, kor</p>
-                <p>Program</p>
-            </div>
-            <div class="card candidate">
-                <p>Jelölt neve</p>
-                <p>Foglalkozás, kor</p>
-                <p>Program</p>
-            </div>
+        <?php
+                $count = 0;
+                foreach (getCandidates($pollInfo->id) as $j) {
+                    $count += 1;
+                    printf('
+                    <div class="card candidate">
+                        <p>%s</p>
+                        <p>%s, %s éves</p>
+                        <p>%s</p>
+                    </div>
+                    ', $j->nev, $j->foglalkozas, $j->kor, $j->program);
+                }
+                if ($count == 0) {
+                    echo "<span>Ehhez a szavazáshoz nem társítottak jelölteket.</span>";
+                }
+
+                ?>
         </div>
-        <?php } ?>
         <?php } else {?>
             <p>Sajnáljuk, hiba történt.</p>
             <h1 class="error"><?php echo $error ?></h1>

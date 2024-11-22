@@ -26,7 +26,17 @@
         <?php if (!isLoggedIn()) { ?>
             <a href="login.php"><button>Bejelentkezés</button></a>
         <?php } else { ?>
-            <a href="logout.php"><button>Kijelentkezés</button></a>
+            <div class="user-menu">
+                <span class="material-symbols-rounded">person</span>
+                <span class="user-name"><?php echo getUserInfo()->nev ?></span>
+                <div class="submenu">
+                    <a href="profile.php">Adataim</a>
+                    <?php if (getUserInfo()->admin_e == 1) { ?>
+                        <a href="admin.php">Adminisztráció</a>
+                    <?php } ?>
+                    <a href="logout.php">Kijelentkezés</a>
+                </div>
+            </div>
         <?php } ?>
     </nav>
     <section>
@@ -53,12 +63,12 @@
                             <p>%s</p>
                             <div>
                                 <span class="material-symbols-rounded">select_check_box</span>
-                                <p>0 szavazat</p>
+                                <p>%d szavazat</p>
                                 <hr class="v">
                                 <span class="material-symbols-rounded">access_time</span>
                                 <p>%s - %s</p>
                             </div>
-                           </a>', $poll->id, $poll->teljesNev, $poll->cim, $poll->kezdet, $poll->veg);
+                           </a>', $poll->id, $poll->teljesNev, $poll->cim, getVoteCount($poll->id), $poll->kezdet, $poll->veg);
                 }
                 if (sizeof($polls) == 0) {
                     echo "<span>Nincsenek szavazások ebben a kategóriában.</span>";

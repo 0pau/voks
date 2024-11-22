@@ -66,12 +66,84 @@
 
     }
 
-    function userHasVoted($pollId) {
-        if (!isLoggedIn()) {
-            return "false";
-        }
-        return "true";
+    function getVoteCount($pollId) {
+        global $db;
+        $stmt = $db->prepare("SELECT COUNT(*) AS szavazatok FROM szavaz WHERE szavazas_id = ?");
+        $stmt->bind_param("i", $pollId);
+        $stmt->execute();
+        $r = $stmt->get_result();
+        return $r->fetch_object()->szavazatok;
     }
 
+    function userHasVoted($pollId) {
+        if (!isLoggedIn()) {
+            return false;
+        }
 
+        global $db;
+        $stmt = $db->prepare("SELECT username FROM szavaz WHERE username = ? AND szavazas_id = ?");
+        $stmt->bind_param("ss", $_SESSION["username"], $pollId);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
+        return $result->num_rows == 1;
+    }
+
+    function getCandidates($pollId) {
+        global $db;
+
+        $stmt = $db->prepare("SELECT jeloltek.* FROM jeloltek, jeloltje WHERE jeloltek.id = jeloltje.jelolt_id AND szavazas_id = ?");
+        $stmt->bind_param("i", $pollId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $r = [];
+
+        while ($row = $result->fetch_object()) {
+            $row->kor = floor((time() - strtotime($row->szuldatum))/(60*60*24*365));
+            $r[] = $row;
+        }
+
+        return $r;
+    }
+
+    function vote($pollId) {
+        global $db;
+
+        $stmt = $db->prepare("INSERT INTO szavaz VALUES (?, ?, ?, NOW())");
+        $stmt->bind_param("sii", $_SESSION["username"], $pollId, $_POST["candidate"]);
+        $stmt->execute();
+        $stmt->close();
+        header("Location: poll.php?id=".$pollId);
+    }
+
+    function getPollResults($pollId) {
+
+        $colors = [
+            "#EF5350",
+            "#29B6F6",
+            "#FFCA28",
+            "#303F9F",
+            "#26A69A",
+            "#827717",
+            "#212121",
+            "#C51162",
+            "#00838F",
+            "#D500F9"
+        ];
+
+        global $db;
+        $stmt = $db->prepare("SELECT nev, COUNT(*) AS szavazatok, (COUNT(*)/(SELECT COUNT(*) FROM szavaz WHERE szavazas_id = ?))*100 AS szazalek FROM szavaz, jeloltek WHERE jeloltek.id = jelolt_id AND szavazas_id = ? GROUP BY jelolt_id ORDER BY szavazatok DESC");
+        $stmt->bind_param("ii", $pollId, $pollId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $results = [];
+        $i = 0;
+        while ($row = $result->fetch_object()) {
+            $row->szin = $colors[$i];
+            $i += 1;
+            $results[] = $row;
+        }
+
+        return $results;
+    }

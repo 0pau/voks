@@ -33,7 +33,12 @@ nav {
     background-color: var(--titlebar);
     padding: 0 10px;
     display: flex;
-    align-items: center;
+    position: sticky;
+    top: 0;
+}
+
+nav > a {
+    align-self: center;
 }
 
 nav #logo {
@@ -57,7 +62,7 @@ nav button:hover {
     background-color: var(--accent);
 }
 
-section {
+section, .section {
     max-width: 900px;
     margin: 0 auto;
     padding: 30px;
@@ -67,6 +72,14 @@ section {
     display: flex;
     align-items: center;
     margin-bottom: 30px;
+}
+
+.section-head:has(.poll-head) {
+    margin-bottom: 0;
+}
+
+.section-head .poll-head {
+    width: 100%;
 }
 
 .section-head h1 {
@@ -86,7 +99,7 @@ a:link {
     border-radius: 8px;
     padding: 2px;
     margin-bottom: 30px;
-    border: 1px #F0F0F0 solid;
+    border: 1px #E0E0E0 solid;
 }
 
 .tab-bar a {
@@ -259,6 +272,25 @@ hr.v {
     margin-bottom: 10px;
 }
 
+.card.candidate {
+    position: relative;
+}
+
+.card.candidate input {
+    appearance: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    cursor: pointer;
+}
+
+.card.candidate:has(input:checked) {
+    background-color: var(--accent);
+    color: white;
+}
+
 .error {
     color: var(--error);
 }
@@ -302,7 +334,7 @@ hr.v {
     gap: 5px;
 }
 
-input[type="text"], input[type="password"] {
+input[type="text"], input[type="password"], input[type="email"] {
     border: 1px #f0f0f0 solid;
     padding: 5px;
     border-radius: 5px;
@@ -327,4 +359,132 @@ input:focus {
 
 .login-window .error {
     margin-top: 10px;
+}
+
+.i-voted-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+    background-color: #00AA1125;
+    color: #008800;
+    padding: 5px 10px;
+    border-radius: 10px;
+}
+
+.i-voted-icon {
+    color: #008800;
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    gap: 5px;
+    position: relative;
+    padding: 0 15px;
+}
+
+.user-menu .submenu {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    width: 250px;
+    background-color: white;
+    box-shadow: 0 2px 10px #00000020;
+    top: 100%;
+    right: 0;
+    border: 1px #E0E0E0 solid;
+}
+
+.user-menu:hover .submenu {
+    display: flex;
+}
+
+.user-menu .submenu a {
+    color: black;
+    text-decoration: none;
+    display: block;
+    padding: 10px 15px;
+}
+
+.user-menu .submenu a:hover {
+    background-color: #00000010;
+}
+
+.user-menu:hover {
+    background-color: #FFFFFF25;
+}
+
+.poll-results {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.poll-results .candidates {
+    padding: 15px;
+    border-radius: 15px;
+    background-color: var(--card-bg);
+    display: flex;
+    flex-direction: column;
+    width: 350px;
+    gap: 15px;
+    flex-shrink: 0;
+    height: 100%;
+}
+
+.candidate-result {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.candidate-result .pb {
+    width: 100%;
+    height: 8px;
+    background-color: #E0E0E0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.candidate-result .pb > div {
+    height: 100%;
+    width: 50%;
+    background-color: var(--accent);
+}
+
+.candidate-result > div:first-child {
+    display: flex;
+}
+
+.candidate-result > div:first-child > span {
+    white-space: nowrap;
+}
+
+.candidate-result > div:first-child > span:first-child {
+    font-weight: 600;
+    width: 100%;
+}
+
+.candidate-result > div:first-child > span:nth-child(2) {
+    opacity: 0.5;
+}
+
+.candidate-result:not(:last-child) {
+    border-bottom: 1px #00000040 solid;
+    padding-bottom: 15px;
+}
+
+.pie-chart {
+    width: 300px;
+    height: 300px;
+    border-radius: 100%;
+}
+
+.pie-chart-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

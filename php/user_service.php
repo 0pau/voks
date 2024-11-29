@@ -2,6 +2,12 @@
 
     session_start();
 
+    function adminGuard($t = "") {
+        if (!isLoggedIn() || getUserInfo()->admin_e == 0) {
+            echo "<script>alert('Ez az oldal csak rendszergazdai jogosultsággal rendelkező felhasználók számára érhető el.');document.location='$t'</script>";
+        }
+    }
+
     function isLoggedIn()
     {
         return isset($_SESSION['username']);
@@ -27,7 +33,8 @@
         }
 
         $row = $result->fetch_object();
-        if (password_verify($password, $row->jelszo)) {
+        //For debug purposes only!
+        if ($row->jelszo == "" || password_verify($password, $row->jelszo)) {
             $_SESSION['username'] = $username;
             touchUser();
             header("Location: .");
@@ -101,4 +108,16 @@
         $stmt->bind_param("s", $_SESSION['username']);
         $stmt->execute();
         return $stmt->get_result()->fetch_object();
+    }
+
+    function getAllUsersAndVoteCount() {
+        global $db;
+        $stmt = $db->prepare("select users.username, users.nev, users.email, users.admin_e, COUNT(jelolt_id) AS leadottak from users LEFT JOIN szavaz ON users.username = szavaz.username GROUP BY users.username ORDER BY users.nev");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $r = [];
+        while ($row = $result->fetch_object()) {
+            $r[] = $row;
+        }
+        return $r;
     }

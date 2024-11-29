@@ -21,14 +21,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>VOKS</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
 <body>
     <nav>
-        <div id="logo">
+        <a href="." id="logo">
             <img src="img/logo.png" id="logo">
             <span>VOKS</span>
-        </div>
+        </a>
         <?php if (!isLoggedIn()) { ?>
             <a href="login.php"><button>Bejelentkezés</button></a>
         <?php } else { ?>
@@ -36,7 +35,6 @@
                 <span class="material-symbols-rounded">person</span>
                 <span class="user-name"><?php echo getUserInfo()->nev ?></span>
                 <div class="submenu">
-                    <a href="profile.php">Adataim</a>
                     <?php if (getUserInfo()->admin_e == 1) { ?>
                         <a href="admin.php">Adminisztráció</a>
                     <?php } ?>
@@ -58,6 +56,14 @@
                     <p class="accentText error">Lejárt szavazás</p>
                 <?php } ?>
             </div>
+            <?php if (isLoggedIn() && getUserInfo()->admin_e == 1) { ?>
+            <a class="flat-btn icn" href="create_poll.php?id=<?php echo $pollInfo->id ?>">
+                <span class="material-symbols-rounded">edit</span>
+            </a>
+            <a class="flat-btn icn" href="api/delete_poll.php?id=<?php echo $pollInfo->id ?>">
+                <span class="material-symbols-rounded">delete</span>
+            </a>
+            <?php } ?>
             <?php if (isLoggedIn() && userHasVoted($pollInfo->id)) { ?>
                 <div class="i-voted-badge">
                     <span class="material-symbols-rounded">editor_choice</span>
@@ -111,7 +117,7 @@
                             foreach ($results as $candidate) {
                                 $pieChartBg = $pieChartBg.$candidate->szin." ".$p."%,";
                                 $pieChartBg = $pieChartBg.$candidate->szin." ".$candidate->szazalek+$p."%,";
-                                $p = $candidate->szazalek;
+                                $p = $candidate->szazalek+$p;
                                 printf('
                                 <div class="candidate-result">
                                     <div>

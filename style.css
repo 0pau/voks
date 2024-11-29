@@ -15,7 +15,14 @@
     box-sizing: border-box;
 }
 
+@font-face {
+    font-family: "Material";
+    src: url("assets/symbols.ttf");
+}
+
 .material-symbols-rounded {
+    font-family: Material;
+    font-size: 24px;
     font-variation-settings:
             'FILL' 0,
             'wght' 300,
@@ -35,6 +42,7 @@ nav {
     display: flex;
     position: sticky;
     top: 0;
+    z-index: 10;
 }
 
 nav > a {
@@ -48,6 +56,7 @@ nav #logo {
     font-size: 18px;
     gap: 10px;
     width: 100%;
+    color: white!important;
 }
 
 nav #logo img {
@@ -72,6 +81,7 @@ section, .section {
     display: flex;
     align-items: center;
     margin-bottom: 30px;
+    gap: 10px;
 }
 
 .section-head:has(.poll-head) {
@@ -86,8 +96,7 @@ section, .section {
     width: 100%;
 }
 
-a:link {
-    color: var(--accent);
+a:link:not(.card):not(.button) {
     text-decoration: none;
 }
 
@@ -107,8 +116,8 @@ a:link {
     text-decoration: none;
 }
 
-.tab-bar a, .tab-bar a:active, .tab-bar a:hover {
-    color: black;
+.tab-bar a:link, .tab-bar a:active, .tab-bar a:hover, .tab-bar a:visited {
+    color: black!important;
     padding: 5px 10px;
     border-radius: 6px;
 }
@@ -291,6 +300,23 @@ hr.v {
     color: white;
 }
 
+.card.candidate:has(input):after {
+    content: "";
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 100%;
+    border: 2px #999999 solid;
+}
+
+.card.candidate:has(input:checked):after {
+    border: 2px transparent solid;
+    background-color: white;
+}
+
 .error {
     color: var(--error);
 }
@@ -334,10 +360,16 @@ hr.v {
     gap: 5px;
 }
 
-input[type="text"], input[type="password"], input[type="email"] {
-    border: 1px #f0f0f0 solid;
+input[type="text"], input[type="date"], input[type="password"], input[type="email"], textarea, .dt-picker, input[type="datetime-local"] {
+    border: 1px #E0E0E0 solid;
     padding: 5px;
     border-radius: 5px;
+    font-size: inherit;
+    font-family: inherit;
+}
+
+textarea {
+    resize: vertical;
 }
 
 .login-window p:last-of-type {
@@ -487,4 +519,222 @@ input:focus {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.create-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.create-form label input:not([type="checkbox"]), .create-form textarea {
+    width: 100%;
+}
+
+.create-form textarea {
+    height: 100px;
+}
+
+.create-form .group {
+    display: flex;
+    gap: 25px;
+}
+
+.create-form .group > * {
+    width: 100%;
+}
+
+.switchbox {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.switchbox div {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.switchbox span:first-child {
+    font-weight: bold;
+}
+
+.switchbox input[type="checkbox"] {
+    appearance: none;
+    width: 50px;
+    height: 22px;
+    background-color: var(--card-bg);
+    border: 1px #E0E0E0 solid;
+    border-radius: 100px;
+    position: relative;
+    cursor: pointer;
+}
+
+.switchbox input[type="checkbox"]:before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    background-color: #A0A0A0;
+    width: 16px;
+    height: 16px;
+    border-radius: 100%;
+    transition: left 0.3s cubic-bezier(1.000, -0.005, 0.000, 0.985);
+}
+
+.switchbox input[type="checkbox"]:checked {
+    background-color: var(--accent);
+    border-color: var(--accent-dark);
+}
+
+.switchbox input[type="checkbox"]:checked:before {
+    background-color: white;
+    left: calc(100% - 18px);
+}
+
+.dt-picker {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dt-picker input {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    text-align: center;
+    font-size: inherit;
+}
+
+.dt-picker input:first-child {
+    width: 36px!important;
+}
+
+.dt-picker input:not(:first-child) {
+    width: 25px!important;
+}
+
+.dt-picker hr {
+    width: 1px;
+    background-color: #E0E0E0;
+    height: 12px;
+    margin: 0 10px 0 15px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.flat-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    padding: 5px 10px;
+    color: var(--accent-dark);
+    border-radius: 5px;
+}
+
+.flat-btn.icn {
+    padding: 5px;
+}
+
+.flat-btn:hover {
+    background-color: #F0F0F0;
+}
+
+.two-sided-box {
+    display: flex;
+    margin-bottom: 50px;
+}
+
+.two-sided-box > div:nth-child(2) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
+    gap: 10px;
+}
+
+.btn {
+    border: 1px #E0E0E0 solid;
+    background-color: #F0F0F0;
+    border-radius: 5px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+}
+
+.two-sided-box > div:first-child, .two-sided-box > div:last-child {
+    width: 100%;
+    height: 400px;
+}
+
+.two-sided-box .l {
+    border: 1px #E0E0E0 solid;
+    height: 100%;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+}
+
+.two-sided-box .l label {
+   padding: 8px 15px;
+   cursor: pointer;
+}
+
+.two-sided-box .l label:has(input:checked) {
+    background-color: var(--accent);
+    color: white;
+}
+
+.two-sided-box .l label:nth-child(2n) {
+    background-color: #FAFAFA;
+}
+
+.two-sided-box .l input {
+    appearance: none;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table tr:first-child {
+    border-bottom: 1px #E0E0E0 solid;
+}
+
+table th {
+    text-align: start;
+}
+
+table th, table td {
+    padding: 10px;
+}
+
+.mb {
+    margin-bottom: 20px;
+}
+
+table td.f > div {
+    display: flex;
+    align-items: center;
+    width: min-content;
+}
+
+table td.f {
+    display: flex;
+    justify-content: end;
+    box-sizing: border-box;
 }

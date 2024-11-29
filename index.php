@@ -15,14 +15,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>VOKS</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
 <body>
     <nav>
-        <div id="logo">
+        <a href="." id="logo">
             <img src="img/logo.png" id="logo">
             <span>VOKS</span>
-        </div>
+        </a>
         <?php if (!isLoggedIn()) { ?>
             <a href="login.php"><button>Bejelentkezés</button></a>
         <?php } else { ?>
@@ -30,7 +29,6 @@
                 <span class="material-symbols-rounded">person</span>
                 <span class="user-name"><?php echo getUserInfo()->nev ?></span>
                 <div class="submenu">
-                    <a href="profile.php">Adataim</a>
                     <?php if (getUserInfo()->admin_e == 1) { ?>
                         <a href="admin.php">Adminisztráció</a>
                     <?php } ?>
@@ -43,13 +41,14 @@
         <div class="section-head">
             <h1>Szavazások</h1>
             <?php if (isLoggedIn()) { ?>
-            <button>Új szavazás kiírása</button>
+            <a href="create_poll.php"><button>Új szavazás kiírása</button></a>
             <?php } ?>
         </div>
         <div class="tab-bar">
             <a href="." class="<?php echo $current_filter=="actual"?"active":""?>">Aktuális szavazások</a>
             <a href="?show=upcoming" class="<?php echo $current_filter=="upcoming"?"active":""?>">Közelgő szavazások</a>
             <a href="?show=closed" class="<?php echo $current_filter=="closed"?"active":""?>">Lezárt szavazások</a>
+            <a href="?show=all" class="<?php echo $current_filter=="all"?"active":""?>">Összes</a>
         </div>
         <div class="list">
             <?php
@@ -68,7 +67,7 @@
                                 <span class="material-symbols-rounded">access_time</span>
                                 <p>%s - %s</p>
                             </div>
-                           </a>', $poll->id, $poll->teljesNev, $poll->cim, getVoteCount($poll->id), $poll->kezdet, $poll->veg);
+                           </a>', $poll->id, $poll->teljesNev, $poll->cim, $poll->szavazatok, $poll->kezdet, $poll->veg);
                 }
                 if (sizeof($polls) == 0) {
                     echo "<span>Nincsenek szavazások ebben a kategóriában.</span>";

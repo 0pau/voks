@@ -6,21 +6,26 @@
     function getPolls($statusFilter = "actual")
     {
         global $db;
-        $query = "SELECT id, kezdet, veg FROM szavazasok";
+        $query = "select users.nev as teljesNev, szavazasok.*, COUNT(szavaz.username) AS szavazatok FROM szavazasok LEFT JOIN szavaz ON szavazasok.id = szavaz.szavazas_id, users WHERE users.username = szavazasok.username";
         if ($statusFilter == "actual") {
-            $query = $query . " WHERE NOW() BETWEEN kezdet AND veg";
+            $query = $query . " AND NOW() BETWEEN kezdet AND veg";
         }
         if ($statusFilter == "upcoming") {
-            $query = $query . " WHERE kezdet > NOW()";
+            $query = $query . " AND kezdet > NOW()";
         }
         if ($statusFilter == "closed") {
-            $query = $query . " WHERE veg < NOW()";
+            $query = $query . " AND veg < NOW()";
         }
+        $query = $query . " GROUP BY szavazasok.id ORDER BY veg DESC";
         $list = [];
         $r = $db->query($query);
 
         while ($row = $r->fetch_object()) {
-            $row = getPollInfo($row->id, $statusFilter);
+
+            $row->kezdet = formatDate($row->kezdet, true);
+            $row->veg = formatDate($row->veg, true);
+
+            //$row = getPollInfo($row->id, $statusFilter);
             $list[] = $row;
         }
 
@@ -28,7 +33,7 @@
     }
 
 
-    function getPollInfo($id) {
+    function getPollInfo($id, $humanReadableDate = true) {
         global $db;
 
         if (empty($id) || !is_numeric($id)) {
@@ -59,8 +64,10 @@
             $obj->status = 0;
         }
 
-        $obj->kezdet = formatDate($obj->kezdet, true);
-        $obj->veg = formatDate($obj->veg, true);
+        if ($humanReadableDate) {
+            $obj->kezdet = formatDate($obj->kezdet, true);
+            $obj->veg = formatDate($obj->veg, true);
+        }
 
         return $obj;
 
@@ -146,4 +153,34 @@
         }
 
         return $results;
+    }
+
+    function createPoll($cim, $leiras, $kezdet, $veg, $elo_e, $candidates) {
+        global $db;
+        $stmt = $db->prepare("INSERT INTO szavazasok (username, cim, leiras, kezdet, veg, elo_e) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssssi", $_SESSION['username'], $cim, $leiras, $kezdet, $veg, $elo_e);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $db->prepare("SELECT id FROM szavazasok ORDER BY id DESC LIMIT 1");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $id = $result->fetch_object()->id;
+
+        foreach (json_decode($candidates) as $c) {
+            $stmt = $db->prepare("INSERT INTO jeloltje (jelolt_id, szavazas_id) VALUES (?, ?)");
+            $stmt->bind_param("ii", $c, $id);
+            $stmt->execute();
+            $stmt->close();
+        }
+
+        return $id;
+    }
+
+    function editPollInfo($id, $cim, $leiras, $kezdet, $veg, $elo_e) {
+        global $db;
+        $stmt = $db->prepare("UPDATE szavazasok SET cim = ?, leiras = ?, kezdet = ?, veg = ?, elo_e = ? WHERE id = ?");
+        $stmt->bind_param("ssssii", $cim, $leiras, $kezdet, $veg, $elo_e, $id);
+        $stmt->execute();
+        $stmt->close();
     }
